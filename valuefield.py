@@ -93,6 +93,15 @@ class IntegerValueField(NumericValueField):
         s = re.sub(self.pat, '', substring)
         super(IntegerValueField, self).insert_text(s, from_undo=from_undo)
 
+class HexIntegerValueField(NumericValueField):
+    pat = re.compile('[^a-fA-F0-9]')
+
+    def insert_text(self, substring, from_undo=False):
+        if '-'  in substring and not '-' in self.text:
+            return super(HexIntegerValueField, self).insert_text(substring, from_undo=from_undo)
+
+        s = re.sub(self.pat, '', substring)
+        super(HexIntegerValueField, self).insert_text(s, from_undo=from_undo)
 
 class FloatValueField(NumericValueField):
     pat = re.compile('[^0-9]')

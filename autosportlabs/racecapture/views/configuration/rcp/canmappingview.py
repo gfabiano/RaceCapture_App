@@ -36,7 +36,7 @@ from autosportlabs.racecapture.views.configuration.channels.channelnameselectorv
 from autosportlabs.uix.layout.sections import SectionBoxLayout
 from fieldlabel import FieldLabel
 from utils import *
-from valuefield import FloatValueField, IntegerValueField
+from valuefield import FloatValueField, IntegerValueField, HexIntegerValueField
 from mappedspinner import MappedSpinner
 
 class LargeSpinnerOption(SpinnerOption):
@@ -55,6 +55,13 @@ class LargeMappedSpinner(MappedSpinner):
 class LargeIntegerValueField(IntegerValueField):
     Builder.load_string("""
 <LargeIntegerValueField>:
+    font_size: self.height * 0.5
+    input_type: 'number'
+""")
+
+class LargeHexIntegerValueField(HexIntegerValueField):
+    Builder.load_string("""
+<LargeHexIntegerValueField>:
     font_size: self.height * 0.5
     input_type: 'number'
 """)
@@ -88,7 +95,7 @@ class CANChannelMappingTab(AnchorLayout, AndroidTabsBase):
             size: self.size
 
     tab_font_name: "resource/fonts/ASL_light.ttf"
-    tab_font_size: sp(20)    
+    tab_font_size: sp(20)
 """)
     tab_font_name = StringProperty()
     tab_font_size = NumericProperty()
@@ -172,7 +179,7 @@ class CANIDMappingTab(CANChannelMappingTab):
         orientation: 'vertical'
         BoxLayout:
             orientation: 'horizontal'
-            spacing: dp(5)            
+            spacing: dp(5)
 
             AnchorLayout:
                 size_hint_x: 0.55
@@ -183,25 +190,25 @@ class CANIDMappingTab(CANChannelMappingTab):
                     SectionBoxLayout:
                         FieldLabel:
                             size_hint_x: 0.3
-                            text: 'CAN ID' 
+                            text: 'CAN ID'
                             halign: 'right'
-    
-                        LargeIntegerValueField:
+
+                        LargeHexIntegerValueField:
                             id: can_id
                             size_hint_x: 0.7
                             on_text: root._on_can_id(*args)
-    
+
                     SectionBoxLayout:
                         FieldLabel:
                             size_hint_x: 0.3
                             text: 'Mask'
                             halign: 'right'
-    
+
                         LargeIntegerValueField:
                             id: mask
                             size_hint_x: 0.7
                             on_text: root._on_mask(*args)
-                            
+
             AnchorLayout:
                 size_hint_x: 0.45
                 BoxLayout:
@@ -226,7 +233,7 @@ class CANIDMappingTab(CANChannelMappingTab):
                             id: can_bus_channel
                             size_hint_x: 0.55
                             on_text: root._on_can_bus(*args)
-                
+
 """)
 
     def __init__(self, **kwargs):
@@ -244,7 +251,7 @@ class CANIDMappingTab(CANChannelMappingTab):
         self.ids.can_bus_channel.setFromValue(self.channel_cfg.mapping.can_bus)
 
         # CAN ID
-        self.ids.can_id.text = str(self.channel_cfg.mapping.can_id)
+        self.ids.can_id.text = '%X' % self.channel_cfg.mapping.can_id
 
         # CAN Sub ID
         self.ids.sub_id.setFromValue(self.channel_cfg.mapping.sub_id)
@@ -259,7 +266,7 @@ class CANIDMappingTab(CANChannelMappingTab):
 
     def _on_can_id(self, instance, value):
         if self._loaded:
-            self.channel_cfg.mapping.can_id = int(value)
+            self.channel_cfg.mapping.can_id = int(value, 16)
 
     def _on_sub_id(self, instance, value):
         if self._loaded:
@@ -273,14 +280,14 @@ class CANValueMappingTab(CANChannelMappingTab):
     Builder.load_string("""
 <CANValueMappingTab>:
     text: 'Raw Value Mapping'
-    
+
     BoxLayout:
         orientation: 'vertical'
-        spacing: dp(5)        
+        spacing: dp(5)
         BoxLayout:
             orientation: 'horizontal'
             spacing: dp(5)
-            
+
             SectionBoxLayout:
                 FieldLabel:
                     text: 'Offset'
@@ -294,7 +301,7 @@ class CANValueMappingTab(CANChannelMappingTab):
                     text: 'Length'
                 LargeMappedSpinner:
                     id: length
-                    on_text: root._on_mapping_length(*args)                    
+                    on_text: root._on_mapping_length(*args)
             SectionBoxLayout:
                 FieldLabel:
                     text: 'Bit Mode'
@@ -307,7 +314,7 @@ class CANValueMappingTab(CANChannelMappingTab):
         BoxLayout:
             orientation: 'horizontal'
             spacing: dp(5)
-            
+
             SectionBoxLayout:
                 size_hint_x: 0.66
                 FieldLabel:
@@ -316,7 +323,7 @@ class CANValueMappingTab(CANChannelMappingTab):
                 MappedSpinner:
                     id: source_type
                     on_text: root._on_source_type(*args)
-            
+
             SectionBoxLayout:
                 size_hint_x: 0.33
                 FieldLabel:
@@ -481,7 +488,7 @@ class CANUnitsConversionMappingTab(CANChannelMappingTab):
     Builder.load_string("""
 <CANUnitsConversionMappingTab>:
     text: 'Units Conversion'
-    
+
     AnchorLayout:
         size_hint_y: 0.5
         BoxLayout:
@@ -494,11 +501,11 @@ class CANUnitsConversionMappingTab(CANChannelMappingTab):
                     size_hint_x: 0.6
                     text: 'Units Conversion'
                 MappedSpinner:
-                    id: filters     
+                    id: filters
                     size_hint_x: 0.4
                     on_text: root._on_filter(*args)
             BoxLayout:
-                size_hint_x: 0.1                    
+                size_hint_x: 0.1
     """)
     def __init__(self, **kwargs):
         super(CANUnitsConversionMappingTab, self).__init__(**kwargs)
